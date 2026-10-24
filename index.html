@@ -524,6 +524,10 @@
         }
 
         const dateStr = u.expiryDate || new Date(expTime).toISOString().split('T')[0];
+        const isDeviceLocked = !!u.boundDeviceId;
+        const devBadge = isDeviceLocked
+          ? `<span style="background:#e0f2fe; color:#0284c7; padding:2px 7px; border-radius:5px; font-family:monospace; font-size:10px; font-weight:700;">🔒 Device: ${u.boundDeviceId}</span>`
+          : `<span style="background:#f1f5f9; color:#64748b; padding:2px 7px; border-radius:5px; font-size:10px;">🔓 Device: Auto</span>`;
 
         return `
           <div class="user-card">
@@ -533,12 +537,13 @@
             </div>
             <div class="user-meta">
               Plan: <b>${u.plan || 'Custom'}</b> • Expires: <span style="color:#0f172a; font-weight:700;">${dateStr}</span><br>
-              Status: <b>${u.status}</b>
+              Status: <b>${u.status}</b> • ${devBadge}
             </div>
             <div class="action-row">
               <button class="act-btn btn-extend-15" onclick="quickExtend('${email}', 15)" title="Add 15 days">⚡ +15d</button>
               <button class="act-btn btn-extend-30" onclick="quickExtend('${email}', 30)" title="Add 30 days">⚡ +30d</button>
               <button class="act-btn btn-custom" onclick="customExtendPrompt('${email}')" title="ইচ্ছামতো দিন দিন">📅 Custom Days</button>
+              ${isDeviceLocked ? `<button class="act-btn" onclick="resetDevice('${email}', '${u.boundDeviceId}')" title="Reset device lock so user can login on new PC">🔄 Reset Dev</button>` : ''}
               <button class="act-btn btn-suspend" onclick="toggleStatus('${email}')">${u.status === 'active' ? '⛔ Suspend' : '✅ Activate'}</button>
               <button class="act-btn btn-del" onclick="deleteUser('${email}')" title="Delete User">🗑️</button>
             </div>
@@ -634,6 +639,24 @@
 
       showToast(`Status updated: ${newStatus}`);
       await loadUsers();
+    }
+
+    async function resetDevice(email, deviceId) {
+      if (confirm(`Reset device lock for ${email}? This will allow the user to bind a new PC.`)) {
+        const sanitizedKey = email.replace(/\./g, ",");
+        await fetch(`${FIREBASE_DB_URL}/${sanitizedKey}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ boundDeviceId: null })
+        });
+        if (deviceId) {
+          await fetch(`https://pngtree-meta-default-rtdb.firebaseio.com/canva_devices/${deviceId}.json`, {
+            method: "DELETE"
+          });
+        }
+        showToast(`🔄 Device reset for ${email}!`);
+        await loadUsers();
+      }
     }
 
     async function deleteUser(email) {
