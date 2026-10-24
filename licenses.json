@@ -1,0 +1,31 @@
+{
+  "settings": {
+    "appName": "Canva Bulk BG Remover Pro",
+    "version": "1.0",
+    "contactEmail": "admin@example.com",
+    "supportTelegram": "@admin"
+  },
+  "users": {
+    "admin@test.com": {
+      "status": "active",
+      "plan": "Lifetime",
+      "expiryDate": "2099-12-31",
+      "days": 9999,
+      "createdAt": "2026-10-25"
+    },
+    "client1@gmail.com": {
+      "status": "active",
+      "plan": "Monthly",
+      "expiryDate": "2026-11-25",
+      "days": 30,
+      "createdAt": "2026-10-25"
+    },
+    "trial@yahoo.com": {
+      "status": "active",
+      "plan": "Trial",
+      "expiryDate": "2026-11-01",
+      "days": 7,
+      "createdAt": "2026-10-25"
+    }
+  }
+}
