@@ -13,13 +13,6 @@
       "days": 9999,
       "createdAt": "2026-10-25"
     },
-    "client1@gmail.com": {
-      "status": "active",
-      "plan": "Monthly",
-      "expiryDate": "2026-11-25",
-      "days": 30,
-      "createdAt": "2026-10-25"
-    },
     "trial@yahoo.com": {
       "status": "active",
       "plan": "Trial",
