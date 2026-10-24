@@ -84,8 +84,8 @@
     }
     .btn-hdr:active { transform: scale(0.96); }
 
-    /* ---------- Token Status Bar ---------- */
-    .token-bar {
+    /* ---------- Cloud Status Bar ---------- */
+    .cloud-bar {
       background: #ecfdf5;
       border: 1px solid #a7f3d0;
       border-radius: 10px;
@@ -96,28 +96,12 @@
       justify-content: space-between;
       margin-bottom: 14px;
     }
-    .token-bar.warning {
-      background: #fffbeb;
-      border-color: #fde68a;
-    }
-    .token-bar-text {
+    .cloud-bar-text {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-weight: 500;
-      color: #065f46;
-    }
-    .token-bar.warning .token-bar-text {
-      color: #92400e;
-    }
-    .token-bar-btn {
-      background: #fff;
-      border: 1px solid #cbd5e1;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 10.5px;
       font-weight: 600;
-      cursor: pointer;
+      color: #065f46;
     }
 
     /* ---------- Stats Row ---------- */
@@ -356,21 +340,20 @@
       <div class="logo">🪄</div>
       <div class="title">
         <h1>Canva Pro Admin</h1>
-        <p>GitHub Remote License Manager</p>
+        <p>Live Realtime Cloud Database</p>
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-hdr" onclick="setupTokenPrompt()" title="GitHub Token Setup">🔑 Token</button>
-      <button class="btn-hdr" onclick="loadLicenses()" title="Reload Data">🔄 Refresh</button>
+      <button class="btn-hdr" onclick="loadUsers()" title="Reload Data">🔄 Refresh</button>
     </div>
   </div>
 
-  <!-- Token Bar -->
-  <div class="token-bar" id="tokenStatusBar">
-    <div class="token-bar-text" id="tokenStatusText">
-      <span>● Checking GitHub Token...</span>
+  <!-- Realtime Cloud Bar -->
+  <div class="cloud-bar">
+    <div class="cloud-bar-text">
+      <span>🟢 Live Realtime Database Connected</span>
     </div>
-    <button class="token-bar-btn" onclick="setupTokenPrompt()">Set Token</button>
+    <span style="font-size:11px; color:#047857; font-weight:600;">Instant Cloud Sync</span>
   </div>
 
   <!-- Stats Row -->
@@ -436,71 +419,36 @@
 
   <!-- User Cards Container -->
   <div class="user-list" id="userList">
-    <div style="text-align: center; color: #64748b; font-size: 12px; padding: 30px;">Loading users from GitHub...</div>
+    <div style="text-align: center; color: #64748b; font-size: 12px; padding: 30px;">Loading users from live database...</div>
   </div>
 
   <!-- Toast -->
   <div id="toast" class="toast">Action completed!</div>
 
   <script>
-    const GH_USER = "smrkarim555";
-    const GH_REPO = "canva-bulk-licenses";
-    const RAW_URL = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/licenses.json`;
+    const FIREBASE_DB_URL = "https://pngtree-meta-default-rtdb.firebaseio.com/canva_users";
 
     let currentFilter = 'all';
-    let dbData = { settings: {}, users: {} };
-    let currentSha = null;
+    let allUsers = [];
 
     window.onload = () => {
-      checkTokenStatus();
-      loadLicenses();
+      loadUsers();
     };
 
-    function checkTokenStatus() {
-      const token = localStorage.getItem('gh_pat_token') || '';
-      const bar = document.getElementById('tokenStatusBar');
-      const text = document.getElementById('tokenStatusText');
-
-      if (token) {
-        bar.className = 'token-bar';
-        text.innerHTML = '<span>🟢 Direct GitHub Cloud Sync Active (No redirects)</span>';
-      } else {
-        bar.className = 'token-bar warning';
-        text.innerHTML = '<span>🟡 GitHub Token not set (Click Set Token to auto-save to cloud)</span>';
-      }
-    }
-
-    function setupTokenPrompt() {
-      const current = localStorage.getItem('gh_pat_token') || '';
-      const token = prompt(
-        "গিটহাবে সরাসরি অটো-সেভ করার জন্য আপনার GitHub Personal Access Token (PAT) দিন:\n(একবার দিলেই ব্রাউজারে সেভ থাকবে, ডিলিট বা এডিট করলে আর কোনো পেজ রিডাইরেক্ট হবে না)",
-        current
-      );
-      if (token !== null) {
-        if (token.trim()) {
-          localStorage.setItem('gh_pat_token', token.trim());
-          showToast("✅ GitHub Token সেভ হয়েছে!");
-        } else {
-          localStorage.removeItem('gh_pat_token');
-          showToast("Token মুছে ফেলা হয়েছে।");
-        }
-        checkTokenStatus();
-      }
-    }
-
-    async function loadLicenses() {
+    async function loadUsers() {
       const container = document.getElementById('userList');
       container.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 30px;">Loading live database...</div>';
 
       try {
-        const res = await fetch(`${RAW_URL}?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Could not fetch licenses.json from GitHub");
-        dbData = await res.json();
-        if (!dbData.users) dbData.users = {};
+        const res = await fetch(`${FIREBASE_DB_URL}.json?nocache=${Date.now()}`);
+        if (!res.ok) throw new Error("Could not fetch database");
+        const data = await res.json() || {};
+        
+        allUsers = Object.values(data).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         updateStats();
         renderUsers();
       } catch (err) {
-        container.innerHTML = `<div style="text-align:center; color:#ef4444; font-size:12px; padding:20px;">Error: ${err.message}<br><button onclick="loadLicenses()" style="margin-top:8px; padding:6px 12px; background:#16a34a; color:#fff; border:none; border-radius:6px; cursor:pointer;">Retry</button></div>`;
+        container.innerHTML = `<div style="text-align:center; color:#ef4444; font-size:12px; padding:20px;">Error: ${err.message}<br><button onclick="loadUsers()" style="margin-top:8px; padding:6px 12px; background:#16a34a; color:#fff; border:none; border-radius:6px; cursor:pointer;">Retry</button></div>`;
       }
     }
 
@@ -520,17 +468,16 @@
     }
 
     function updateStats() {
-      const users = Object.values(dbData.users || {});
-      const now = new Date();
+      const now = Date.now();
       let active = 0, expired = 0;
 
-      users.forEach(u => {
-        const exp = new Date(u.expiryDate);
-        if (u.status === 'active' && exp >= now) active++;
+      allUsers.forEach(u => {
+        const exp = u.subscriptionExpiresAt || (u.expiryDate ? new Date(u.expiryDate).getTime() : 0);
+        if (u.status === 'active' && exp > now) active++;
         else expired++;
       });
 
-      document.getElementById('totalCount').innerText = users.length;
+      document.getElementById('totalCount').innerText = allUsers.length;
       document.getElementById('activeCount').innerText = active;
       document.getElementById('expiredCount').innerText = expired;
     }
@@ -538,13 +485,14 @@
     function renderUsers() {
       const container = document.getElementById('userList');
       const q = document.getElementById('searchBox').value.toLowerCase().trim();
-      const emails = Object.keys(dbData.users || {});
-      const now = new Date();
+      const now = Date.now();
 
-      const filtered = emails.filter(email => {
+      const filtered = allUsers.filter(u => {
+        const email = (u.email || '').toLowerCase();
         if (q && !email.includes(q)) return false;
-        const u = dbData.users[email];
-        const isExp = new Date(u.expiryDate) < now;
+
+        const exp = u.subscriptionExpiresAt || (u.expiryDate ? new Date(u.expiryDate).getTime() : 0);
+        const isExp = exp <= now;
 
         if (currentFilter === 'active') return u.status === 'active' && !isExp;
         if (currentFilter === 'expired') return isExp || u.status !== 'active';
@@ -557,11 +505,11 @@
         return;
       }
 
-      container.innerHTML = filtered.map(email => {
-        const u = dbData.users[email];
-        const expiry = new Date(u.expiryDate);
-        const isExpired = expiry < now;
-        let daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+      container.innerHTML = filtered.map(u => {
+        const email = u.email;
+        const expTime = u.subscriptionExpiresAt || (u.expiryDate ? new Date(u.expiryDate).getTime() : 0);
+        const isExpired = expTime <= now;
+        let daysLeft = Math.ceil((expTime - now) / (1000 * 60 * 60 * 24));
         if (daysLeft < 0) daysLeft = 0;
 
         let badgeClass = 'badge-active';
@@ -575,6 +523,8 @@
           badgeText = 'Expired';
         }
 
+        const dateStr = u.expiryDate || new Date(expTime).toISOString().split('T')[0];
+
         return `
           <div class="user-card">
             <div class="user-card-header">
@@ -582,8 +532,8 @@
               <span class="badge ${badgeClass}">${badgeText}</span>
             </div>
             <div class="user-meta">
-              Plan: <b>${u.plan || 'Custom'}</b> • Expires: <span style="color:#0f172a; font-weight:700;">${u.expiryDate}</span><br>
-              Created: ${u.createdAt || 'N/A'} • Status: <b>${u.status}</b>
+              Plan: <b>${u.plan || 'Custom'}</b> • Expires: <span style="color:#0f172a; font-weight:700;">${dateStr}</span><br>
+              Status: <b>${u.status}</b>
             </div>
             <div class="action-row">
               <button class="act-btn btn-extend-15" onclick="quickExtend('${email}', 15)" title="Add 15 days">⚡ +15d</button>
@@ -607,49 +557,58 @@
         return;
       }
 
-      const now = new Date();
-      now.setDate(now.getDate() + days);
-      const expiryDate = now.toISOString().split('T')[0];
+      const now = Date.now();
+      const expTime = now + (days * 24 * 60 * 60 * 1000);
+      const expiryDate = new Date(expTime).toISOString().split('T')[0];
 
-      dbData.users[email] = {
+      const record = {
+        email: email,
         status: "active",
         plan: plan,
         expiryDate: expiryDate,
+        subscriptionExpiresAt: expTime,
         days: days,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: now
       };
 
-      document.getElementById('newEmail').value = '';
-      updateStats();
-      renderUsers();
-      showToast(`✅ ${email} সেভ করা হয়েছে (${days} দিন)`);
+      const sanitizedKey = email.replace(/\./g, ",");
+      await fetch(`${FIREBASE_DB_URL}/${sanitizedKey}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record)
+      });
 
-      await saveChanges(`Add subscriber ${email} for ${days} days`);
+      document.getElementById('newEmail').value = '';
+      showToast(`✅ ${email} সেভ করা হয়েছে (${days} দিন)`);
+      await loadUsers();
     }
 
     async function quickExtend(email, addDays) {
-      const u = dbData.users[email];
-      if (!u) return;
+      const sanitizedKey = email.replace(/\./g, ",");
+      const user = allUsers.find(u => u.email === email);
+      if (!user) return;
 
-      const currentExp = new Date(u.expiryDate);
-      const now = new Date();
+      const now = Date.now();
+      const currentExp = user.subscriptionExpiresAt || (user.expiryDate ? new Date(user.expiryDate).getTime() : 0);
       const base = currentExp > now ? currentExp : now;
-      base.setDate(base.getDate() + addDays);
+      const newExp = base + (addDays * 24 * 60 * 60 * 1000);
+      const newExpiryDate = new Date(newExp).toISOString().split('T')[0];
 
-      u.expiryDate = base.toISOString().split('T')[0];
-      u.status = 'active';
+      await fetch(`${FIREBASE_DB_URL}/${sanitizedKey}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "active",
+          subscriptionExpiresAt: newExp,
+          expiryDate: newExpiryDate
+        })
+      });
 
-      updateStats();
-      renderUsers();
       showToast(`✅ ${email} কে +${addDays} দিন বৃদ্ধি করা হয়েছে!`);
-
-      await saveChanges(`Extend ${email} by ${addDays} days`);
+      await loadUsers();
     }
 
     async function customExtendPrompt(email) {
-      const u = dbData.users[email];
-      if (!u) return;
-
       const input = prompt(`কত দিন মেয়াদ বাড়াতে চান (${email}) এর জন্য?\n(যেমন: 7, 15, 30, 45, 60, 90, 365)`, "30");
       if (input !== null) {
         const d = parseInt(input.trim(), 10);
@@ -662,96 +621,29 @@
     }
 
     async function toggleStatus(email) {
-      const u = dbData.users[email];
-      if (!u) return;
-      u.status = (u.status === 'active') ? 'suspended' : 'active';
-      updateStats();
-      renderUsers();
-      showToast(`Status updated: ${u.status}`);
-      await saveChanges(`Toggle status ${email}`);
+      const user = allUsers.find(u => u.email === email);
+      if (!user) return;
+      const newStatus = (user.status === 'active') ? 'suspended' : 'active';
+      const sanitizedKey = email.replace(/\./g, ",");
+
+      await fetch(`${FIREBASE_DB_URL}/${sanitizedKey}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      showToast(`Status updated: ${newStatus}`);
+      await loadUsers();
     }
 
     async function deleteUser(email) {
       if (confirm(`Are you sure you want to delete ${email}?`)) {
-        delete dbData.users[email];
-        updateStats();
-        renderUsers();
+        const sanitizedKey = email.replace(/\./g, ",");
+        await fetch(`${FIREBASE_DB_URL}/${sanitizedKey}.json`, {
+          method: "DELETE"
+        });
         showToast(`🗑️ ${email} ডিলিট করা হয়েছে!`);
-        await saveChanges(`Delete user ${email}`);
-      }
-    }
-
-    // Direct background sync to GitHub via REST API - NO REDIRECTS EVER!
-    async function saveChanges(commitMsg) {
-      const token = localStorage.getItem('gh_pat_token') || '';
-
-      if (!token) {
-        // If token not present, ask gently once
-        const userToken = prompt(
-          "গিটহাবে সরাসরি ক্লাউডে অটো-সেভ করতে GitHub Token দিন:\n(একবার দিলেই ব্রাউজারে সেভ থাকবে, কোনো পেজ ওপেন হবে না)",
-          ""
-        );
-        if (userToken && userToken.trim()) {
-          localStorage.setItem('gh_pat_token', userToken.trim());
-          checkTokenStatus();
-          return saveChanges(commitMsg);
-        } else {
-          showToast("⚠️ পরিবর্তনটি কেবল এই পেজে সংরক্ষিত (টোকেন দিলে গিটহাবে সেভ হবে)");
-          return;
-        }
-      }
-
-      showToast("⏳ গিটহাবে অটো-সেভ হচ্ছে...");
-
-      try {
-        // 1. Fetch current file SHA
-        const getRes = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/licenses.json`, {
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-
-        if (!getRes.ok) {
-          if (getRes.status === 401) {
-            localStorage.removeItem('gh_pat_token');
-            checkTokenStatus();
-            alert("GitHub Token টি ভুল বা ইনভ্যালিড। দয়া করে সঠিক টোকেন দিন।");
-            return;
-          }
-          throw new Error(`GitHub API Error: ${getRes.statusText}`);
-        }
-
-        const fileData = await getRes.json();
-        const sha = fileData.sha;
-
-        // 2. Put updated JSON
-        const jsonStr = JSON.stringify(dbData, null, 2);
-        const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
-
-        const putRes = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/licenses.json`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: commitMsg || "Update licenses.json via Admin Panel",
-            content: base64Content,
-            sha: sha
-          })
-        });
-
-        if (!putRes.ok) {
-          const err = await putRes.json();
-          throw new Error(err.message || "Failed to commit");
-        }
-
-        showToast("✅ গিটহাবে ক্লাউড সেভ সম্পন্ন হয়েছে!");
-      } catch (err) {
-        console.error("Cloud sync error:", err);
-        showToast("❌ ক্লাউড এরর: " + err.message);
+        await loadUsers();
       }
     }
 
