@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Canva Pro Admin Panel - License Control</title>
+  <style>
+    :root {
+      --primary: #ef4444;
+      --primary-dark: #dc2626;
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --radius: 14px;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ---------- Header ---------- */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 6px 2px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ef4444, #f59e0b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    .title h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .title p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .refresh-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .refresh-btn:active { transform: scale(0.96); }
+
+    /* ---------- Stats Cards ---------- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-val { font-size: 19px; font-weight: 800; color: #f59e0b; }
+    .stat-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+
+    /* ---------- Add New User Box ---------- */
+    .add-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .add-box-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .input-field {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 12px;
+      margin-bottom: 8px;
+      outline: none;
+    }
+    .input-field:focus { border-color: var(--primary); }
+
+    .days-presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .preset-btn {
+      background: #090d16;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 0;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .preset-btn:hover { border-color: #f59e0b; color: #fff; }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* Search & Filter Tabs */
+    .search-box {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: #fff;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    .search-box:focus { border-color: var(--primary); }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+    }
+    .filter-tab {
+      padding: 6px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .filter-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* ---------- User Cards List ---------- */
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 40px;
+    }
+    .user-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .user-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .user-email {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .badge {
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-expired { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-suspended { background: #334155; color: #94a3b8; }
+
+    .user-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .act-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #090d16;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+    .act-btn:hover { background: #1e293b; color: #fff; }
+    .act-btn.btn-plus { border-color: rgba(245, 158, 11, 0.4); color: #fbbf24; }
+    .act-btn.btn-del { color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      background: #059669;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: all 0.2s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">👑</div>
+      <div class="title">
+        <h1>Canva Extension Admin</h1>
+        <p>smrkarim555/canva-bulk-licenses</p>
+      </div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadLicenses()">
+      <span>🔄</span> <span>Refresh</span>
+    </button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="totalCount">0</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color: #34d399;" id="activeCount">0</div>
+      <div class="stat-label">Active Pro</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color: #f87171;" id="expiredCount">0</div>
+      <div class="stat-label">Expired</div>
+    </div>
+  </div>
+
+  <!-- Add User Box -->
+  <div class="add-box">
+    <div class="add-box-title">
+      <span>+ Add / Extend Subscriber</span>
+      <span style="font-size: 10px; color: #f59e0b;">Anti-Reset Timer</span>
+    </div>
+    <input type="email" id="newEmail" placeholder="customer@gmail.com" class="input-field">
+    
+    <div class="days-presets">
+      <button class="preset-btn" onclick="setPresetDays(7, '7-Day Pass')">7 Days</button>
+      <button class="preset-btn" onclick="setPresetDays(15, '15-Day Pass')">15 Days</button>
+      <button class="preset-btn" onclick="setPresetDays(30, 'Monthly Pro')">30 Days</button>
+      <button class="preset-btn" onclick="setPresetDays(365, 'Yearly VIP')">1 Year</button>
+    </div>
+
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <input type="number" id="newDays" value="30" min="1" max="9999" placeholder="Days" class="input-field" style="margin-bottom:0; width:50%; font-weight:700; color:#fbbf24;">
+      <input type="text" id="newPlan" value="Monthly Pro" placeholder="Plan Name" class="input-field" style="margin-bottom:0; width:50%;">
+    </div>
+
+    <button class="btn-submit" onclick="handleAddUser()">+ Save & Activate Subscriber</button>
+  </div>
+
+  <!-- Search -->
+  <input type="text" id="searchBox" placeholder="🔍 Search email..." class="search-box" oninput="renderUsers()">
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">All Users</div>
+    <div class="filter-tab" data-filter="active" onclick="setFilter('active')">✅ Active</div>
+    <div class="filter-tab" data-filter="expired" onclick="setFilter('expired')">❌ Expired</div>
+  </div>
+
+  <!-- User Cards Container -->
+  <div class="user-list" id="userList">
+    <div style="text-align: center; color: #64748b; font-size: 12px; padding: 30px;">Loading users from GitHub...</div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">Action completed!</div>
+
+  <script>
+    // GitHub Direct RAW & API Configuration
+    const GH_USER = "smrkarim555";
+    const GH_REPO = "canva-bulk-licenses";
+    const RAW_URL = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/main/licenses.json`;
+
+    let currentFilter = 'all';
+    let dbData = { settings: {}, users: {} };
+
+    window.onload = () => {
+      loadLicenses();
+    };
+
+    async function loadLicenses() {
+      const container = document.getElementById('userList');
+      container.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 30px;">Loading live database...</div>';
+
+      try {
+        const res = await fetch(`${RAW_URL}?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Could not fetch licenses.json from GitHub");
+        dbData = await res.json();
+        if (!dbData.users) dbData.users = {};
+        updateStats();
+        renderUsers();
+      } catch (err) {
+        container.innerHTML = `<div style="text-align:center; color:#f87171; font-size:12px; padding:20px;">Error: ${err.message}<br><button onclick="loadLicenses()" style="margin-top:8px; padding:4px 10px; background:#1e293b; color:#fff; border:none; border-radius:6px; cursor:pointer;">Retry</button></div>`;
+      }
+    }
+
+    function setPresetDays(days, plan) {
+      document.getElementById('newDays').value = days;
+      document.getElementById('newPlan').value = plan;
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === filter);
+      });
+      renderUsers();
+    }
+
+    function updateStats() {
+      const users = Object.values(dbData.users || {});
+      const now = new Date();
+      let active = 0, expired = 0;
+
+      users.forEach(u => {
+        const exp = new Date(u.expiryDate);
+        if (u.status === 'active' && exp >= now) active++;
+        else expired++;
+      });
+
+      document.getElementById('totalCount').innerText = users.length;
+      document.getElementById('activeCount').innerText = active;
+      document.getElementById('expiredCount').innerText = expired;
+    }
+
+    function renderUsers() {
+      const container = document.getElementById('userList');
+      const q = document.getElementById('searchBox').value.toLowerCase().trim();
+      const users = Object.keys(dbData.users || {});
+      const now = new Date();
+
+      const filtered = users.filter(email => {
+        if (q && !email.includes(q)) return false;
+        const u = dbData.users[email];
+        const isExp = new Date(u.expiryDate) < now || u.status !== 'active';
+
+        if (currentFilter === 'active') return !isExp;
+        if (currentFilter === 'expired') return isExp;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; font-size: 12px; padding: 30px;">No subscribers found.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(email => {
+        const u = dbData.users[email];
+        const expiry = new Date(u.expiryDate);
+        const isExpired = expiry < now;
+        let daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+        if (daysLeft < 0) daysLeft = 0;
+
+        const badgeHtml = (!isExpired && u.status === 'active')
+          ? `<span class="badge badge-active">Active (${daysLeft}d left)</span>`
+          : (u.status !== 'active' ? `<span class="badge badge-suspended">Suspended</span>` : `<span class="badge badge-expired">Expired</span>`);
+
+        return `
+          <div class="user-card">
+            <div class="user-card-header">
+              <span class="user-email">${email}</span>
+              ${badgeHtml}
+            </div>
+            <div class="user-meta">
+              Plan: <b>${u.plan || 'Custom'}</b> • Expires: <span style="color:#fbbf24; font-family:monospace;">${u.expiryDate}</span><br>
+              Created: ${u.createdAt || 'N/A'} • Status: ${u.status}
+            </div>
+            <div class="action-row">
+              <button class="act-btn btn-plus" onclick="quickExtend('${email}', 7)">+7 Days</button>
+              <button class="act-btn btn-plus" onclick="quickExtend('${email}', 30)">+30 Days</button>
+              <button class="act-btn" onclick="toggleStatus('${email}')">${u.status === 'active' ? 'Suspend' : 'Activate'}</button>
+              <button class="act-btn btn-del" onclick="deleteUser('${email}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleAddUser() {
+      const email = document.getElementById('newEmail').value.trim().toLowerCase();
+      const days = parseInt(document.getElementById('newDays').value, 10) || 30;
+      const plan = document.getElementById('newPlan').value.trim() || 'Monthly Pro';
+
+      if (!email || !email.includes('@')) {
+        alert("সঠিক ইমেইল এড্রেস লিখুন!");
+        return;
+      }
+
+      const now = new Date();
+      now.setDate(now.getDate() + days);
+      const expiryDate = now.toISOString().split('T')[0];
+
+      dbData.users[email] = {
+        status: "active",
+        plan: plan,
+        expiryDate: expiryDate,
+        days: days,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      document.getElementById('newEmail').value = '';
+      updateStats();
+      renderUsers();
+      saveToGithubFlow(`Add/Update subscriber ${email}`);
+    }
+
+    function quickExtend(email, addDays) {
+      const u = dbData.users[email];
+      if (!u) return;
+
+      const currentExp = new Date(u.expiryDate);
+      const base = currentExp > new Date() ? currentExp : new Date();
+      base.setDate(base.getDate() + addDays);
+
+      u.expiryDate = base.toISOString().split('T')[0];
+      u.status = 'active';
+
+      updateStats();
+      renderUsers();
+      saveToGithubFlow(`Extend ${email} by ${addDays} days`);
+    }
+
+    function toggleStatus(email) {
+      const u = dbData.users[email];
+      if (!u) return;
+      u.status = (u.status === 'active') ? 'suspended' : 'active';
+      updateStats();
+      renderUsers();
+      saveToGithubFlow(`Toggle status for ${email}`);
+    }
+
+    function deleteUser(email) {
+      if (confirm(`${email} ডিলিট করতে চান?`)) {
+        delete dbData.users[email];
+        updateStats();
+        renderUsers();
+        saveToGithubFlow(`Delete user ${email}`);
+      }
+    }
+
+    function saveToGithubFlow(actionText) {
+      const jsonStr = JSON.stringify(dbData, null, 2);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast("✓ Copied updated JSON! গিটহাবে Commit করুন।");
+      });
+
+      // Prompt direct edit link
+      const editUrl = `https://github.com/${GH_USER}/${GH_REPO}/edit/main/licenses.json`;
+      if (confirm(`${actionText} সম্পন্ন হয়েছে!\n\nআপডেটেড কোড ক্লিপবোর্ডে কপি হয়েছে।\nএখন কি GitHub-এর licenses.json ফাইলে গিয়ে Paste & Commit করবেন?`)) {
+        window.open(editUrl, '_blank');
+      }
+    }
+
+    function showToast(text) {
+      const t = document.getElementById('toast');
+      t.innerText = text;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+  </script>
+</body>
+</html>
